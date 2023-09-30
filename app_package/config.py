@@ -5,18 +5,32 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-with open(os.path.join(os.environ.get('CONFIG_PATH'), os.environ.get('CONFIG_FILE_NAME'))) as config_file:
-    config_dict = json.load(config_file)
-
+# with open(os.path.join(os.environ.get('CONFIG_PATH'), os.environ.get('CONFIG_FILE_NAME'))) as config_file:
+#     config_dict = json.load(config_file)
+match os.environ.get('FLASK_CONFIG_TYPE'):
+    case 'dev' :
+        with open(os.path.join(os.environ.get('CONFIG_PATH_SERVER'), os.environ.get('CONFIG_FILE_NAME'))) as env_file:
+            config_dict = json.load(env_file)
+        # os.environ["PROJECT_ROOT"] = "/home/nick/applications/exFlaskBlueprintFrameworkStarterWithLogin_dev/"
+    case 'prod' :
+        with open(os.path.join(os.environ.get('CONFIG_PATH_SERVER'), os.environ.get('CONFIG_FILE_NAME'))) as env_file:
+            config_dict = json.load(env_file)
+        # os.environ["PROJECT_ROOT"] = "/home/nick/applications/exFlaskBlueprintFrameworkStarterWithLogin/"
+    case _:
+        print(f"Config_path: {os.environ.get('CONFIG_PATH')}")
+        with open(os.path.join(os.environ.get('CONFIG_PATH'), os.environ.get('CONFIG_FILE_NAME'))) as env_file:
+            config_dict = json.load(env_file)
+        # os.environ["PROJECT_ROOT"] = "/Users/nick/Documents/exFlaskBlueprintFrameworkStarterWithLogin/"
 
 class ConfigBase:
 
     def __init__(self):
 
         self.SECRET_KEY = config_dict.get('SECRET_KEY')
-        self.WEB_ROOT = os.environ.get('WEB_ROOT')
+        self.PROJECT_ROOT = os.environ.get('PROJECT_ROOT')
         self.DB_ROOT = os.environ.get('DB_ROOT')
         self.DESTINATION_PASSWORD = config_dict.get('DESTINATION_PASSWORD')
+        self.DIR_DB_AUXILARY = os.path.join(self.DB_ROOT,"auxilary")
 
 
 class ConfigLocal(ConfigBase):
@@ -43,12 +57,20 @@ class ConfigProd(ConfigBase):
     DEBUG = False
 
 
-if os.environ.get('CONFIG_TYPE')=='local':
-    config = ConfigLocal()
-    print('- /app_pacakge/config: Local')
-elif os.environ.get('CONFIG_TYPE')=='dev':
-    config = ConfigDev()
-    print('- /app_pacakge/config: Development')
-elif os.environ.get('CONFIG_TYPE')=='prod':
-    config = ConfigProd()
-    print('- /app_pacakge/config: Production')
+match os.environ.get('FLASK_CONFIG_TYPE'):
+    case 'dev' :
+        config = ConfigDev()
+        print('- /app_pacakge/config: Development')
+    case 'prod' :
+        config = ConfigProd()
+        print('- /app_pacakge/config: Production')
+    case _ :
+        config = ConfigLocal()
+        print('- /app_pacakge/config: Local')
+    
+# elif os.environ.get('FLASK_CONFIG_TYPE')=='dev':
+#     config = ConfigDev()
+#     print('- /app_pacakge/config: Development')
+# elif os.environ.get('FLASK_CONFIG_TYPE')=='prod':
+#     config = ConfigProd()
+#     print('- /app_pacakge/config: Production')
